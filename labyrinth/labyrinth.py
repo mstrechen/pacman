@@ -1,10 +1,10 @@
-from typing import Set, Tuple, List
+from typing import Dict, List, Set, Tuple
 
 
 class Labyrinth:
     def __init__(self):
         self.cells: Set[Tuple[int, int]] = set()
-        self.edges: dict[Tuple[int, int], Set[Tuple[int, int]]] = dict()
+        self.edges: Dict[Tuple[int, int], Set[Tuple[int, int]]] = dict()
         self.raw_img: List[str] = []
 
     def _add_edge(self, cell_from: Tuple[int, int], cell_to: Tuple[int, int]) -> None:
