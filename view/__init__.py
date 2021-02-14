@@ -97,7 +97,7 @@ class View:
         return intermediate_states
 
     @staticmethod
-    def _get_rotation(self, from_xy, to_xy):
+    def _get_rotation(from_xy, to_xy):
         x_f, y_f = from_xy
         x_t, y_t = to_xy
         if x_t < x_f:
