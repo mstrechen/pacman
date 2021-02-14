@@ -19,7 +19,7 @@ class Labyrinth:
             for line in input_file:
                 if line == "":
                     break
-                self.raw_img.append(line)
+                self.raw_img.append(line[:-1] if line.endswith('\n') else line)
                 for pos in range(len(line) - 1):
                     if line[pos] == ' ':
                         self.cells.add((line_num, pos))
@@ -35,3 +35,9 @@ class Labyrinth:
 
                 line_num += 1
                 prev_line = line
+
+    @classmethod
+    def from_file(cls, filepath: str) -> 'Labyrinth':
+        labyrinth = cls()
+        labyrinth.load_from_file(filepath)
+        return labyrinth
