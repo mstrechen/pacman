@@ -4,14 +4,14 @@ from labyrinth.labyrinth import Labyrinth
 
 class TestLabyrinth(TestCase):
     def test_load_from_file(self):
-        raw_data = ["######\n",
-                    "  ##  \n",
-                    "#    #\n",
-                    "# ## #\n",
-                    "#    #\n",
-                    "######\n"]
+        raw_data = ["######",
+                    "  ##  ",
+                    "#    #",
+                    "# ## #",
+                    "#    #",
+                    "######"]
         with open("test_file.txt", "w+") as test_file:
-            test_file.writelines(raw_data)
+            test_file.writelines(map(lambda s: s + '\n', raw_data))
         labyrinth = Labyrinth()
         labyrinth.load_from_file("test_file.txt")
 
