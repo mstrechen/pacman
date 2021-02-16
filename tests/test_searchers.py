@@ -40,7 +40,6 @@ class TestSearchers(TestCase):
 
     def test_a_star(self):
         labyrinth = get_labyrinth()
-
         a_star_searcher = Strategy.get('A*')
         a_star_searcher.setup(labyrinth)
 
