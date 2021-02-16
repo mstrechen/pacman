@@ -1,5 +1,8 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 from queue import PriorityQueue
+from .common import find_free_place, gen_path, format
+from .base_strategy import Strategy
+from labyrinth.labyrinth import Labyrinth
 
 
 class TunneledManhattan:
@@ -30,9 +33,17 @@ def restore_path(parent, src, dest) -> List:
     return path[::-1]
 
 
-class AStar:
-    def __init__(self, heuristic):
-        self.heuristic = heuristic
+class AStar(Strategy):
+    NAME = 'A*'
+
+    def setup(self, labyrinth: Labyrinth) -> Dict[str, Any]:
+        super(AStar, self).setup(labyrinth)
+        dimensions = len(labyrinth.raw_img), len(labyrinth.raw_img[0])
+        self.heuristic = TunneledManhattan(dimensions)
+        self.path = None
+        self.src = find_free_place(self.labyrinth)
+        self.set_new_target()
+        return format(self.src, self.target)
 
     def a_star(self, labyrinth, src, dest) -> List:
         queue = PriorityQueue()
@@ -64,4 +75,20 @@ class AStar:
         return None
 
     def apply(self, labyrinth, src, dest):
-        return self.a_star(labyrinth, src, dest)
+        path = self.a_star(labyrinth, src, dest)
+        if path is None:
+            raise ValueError(f"Destination {dest} is unreachable from source {src}")
+        self.path = gen_path(path, self.target)
+
+    def set_new_target(self):
+        self.target = find_free_place(self.labyrinth)
+        self.apply(self.labyrinth, self.src, self.target)
+
+    def next_step(self) -> Dict[str, Any]:
+        next_position = next(self.path)
+        while next_position is None:
+            self.src = self.target
+            self.set_new_target()
+            next_position = next(self.path)
+        return next_position
+

@@ -1,9 +1,7 @@
 from unittest import TestCase
 from labyrinth.labyrinth import Labyrinth
 from setup import prepare_test_file
-from search.depth_first import DFS
-from search.a_star import AStar, TunneledManhattan
-from search.searcher import Searcher
+from strategies import Strategy
 
 
 def get_labyrinth():
@@ -15,12 +13,14 @@ def get_labyrinth():
     return labyrinth
 
 
-def get_path(searcher):
+def get_path(searcher, target):
     path = []
-    next = searcher.get_next_state()
+    next = searcher.next_step()
     while next is not None:
         path.append(next['pacman'])
-        next = searcher.get_next_state()
+        if next['pacman'] == target:
+            break
+        next = searcher.next_step()
 
     return path
 
@@ -28,10 +28,11 @@ def get_path(searcher):
 class TestSearchers(TestCase):
     def test_dfs(self):
         labyrinth = get_labyrinth()
-        dfs_searcher = Searcher(labyrinth, DFS(), (1, 0))
-        dfs_searcher.set_target((4, 1))
+        dfs_searcher = Strategy.get('DFS')
 
-        path = get_path(dfs_searcher)
+        dfs_searcher.apply(labyrinth, (1, 0), (4, 1))
+
+        path = get_path(dfs_searcher, (4, 1))
 
         expected_path = [(1, 1), (2, 1), (3, 1), (4, 1)]
 
@@ -39,10 +40,13 @@ class TestSearchers(TestCase):
 
     def test_a_star(self):
         labyrinth = get_labyrinth()
-        a_star_searcher = Searcher(labyrinth, AStar(TunneledManhattan((6, 6))), (1, 0))
-        a_star_searcher.set_target((4, 1))
 
-        path = get_path(a_star_searcher)
+        a_star_searcher = Strategy.get('A*')
+        a_star_searcher.setup(labyrinth)
+
+        a_star_searcher.apply(labyrinth, (1, 0), (4, 1))
+
+        path = get_path(a_star_searcher, (4, 1))
 
         expected_path = [(1, 1), (2, 1), (3, 1), (4, 1)]
 
