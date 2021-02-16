@@ -1,17 +1,12 @@
 from unittest import TestCase
 from labyrinth.labyrinth import Labyrinth
+from setup import prepare_test_file
 
 
 class TestLabyrinth(TestCase):
     def test_load_from_file(self):
-        raw_data = ["######\n",
-                    "  ##  \n",
-                    "#    #\n",
-                    "# ## #\n",
-                    "#    #\n",
-                    "######\n"]
-        with open("test_file.txt", "w+") as test_file:
-            test_file.writelines(raw_data)
+        prepare_test_file()
+
         labyrinth = Labyrinth()
         labyrinth.load_from_file("test_file.txt")
 
