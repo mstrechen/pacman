@@ -34,6 +34,14 @@ class TestLabyrinth(TestCase):
             (4, 4): {(4, 3), (3, 4)},
         }
 
+        expected_data = [
+                "######",
+                "  ##  ",
+                "#    #",
+                "# ## #",
+                "#    #",
+                "######"]
+
         self.assertEqual(expected_cells, labyrinth.cells)
         self.assertEqual(expected_edges, labyrinth.edges)
-        self.assertEqual(raw_data, labyrinth.raw_img)
+        self.assertEqual(expected_data, labyrinth.raw_img)
