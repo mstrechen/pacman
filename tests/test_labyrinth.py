@@ -1,17 +1,12 @@
 from unittest import TestCase
 from labyrinth.labyrinth import Labyrinth
+from .setup import prepare_test_file
 
 
 class TestLabyrinth(TestCase):
     def test_load_from_file(self):
-        raw_data = ["######",
-                    "  ##  ",
-                    "#    #",
-                    "# ## #",
-                    "#    #",
-                    "######"]
-        with open("test_file.txt", "w+") as test_file:
-            test_file.writelines(map(lambda s: s + '\n', raw_data))
+        prepare_test_file()
+
         labyrinth = Labyrinth()
         labyrinth.load_from_file("test_file.txt")
 
@@ -39,6 +34,14 @@ class TestLabyrinth(TestCase):
             (4, 4): {(4, 3), (3, 4)},
         }
 
+        expected_data = [
+                "######",
+                "  ##  ",
+                "#    #",
+                "# ## #",
+                "#    #",
+                "######"]
+
         self.assertEqual(expected_cells, labyrinth.cells)
         self.assertEqual(expected_edges, labyrinth.edges)
-        self.assertEqual(raw_data, labyrinth.raw_img)
+        self.assertEqual(expected_data, labyrinth.raw_img)
