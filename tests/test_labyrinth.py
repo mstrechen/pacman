@@ -1,6 +1,6 @@
 from unittest import TestCase
 from labyrinth.labyrinth import Labyrinth
-from setup import prepare_test_file
+from .setup import prepare_test_file
 
 
 class TestLabyrinth(TestCase):
