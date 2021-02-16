@@ -4,6 +4,7 @@ import pygame
 class Pacman(pygame.sprite.Sprite):
     def __init__(self, size):
         super(Pacman, self).__init__()
+        self.size = size
         image = pygame.image.load('view/sprites/pacman.png')
         image = pygame.transform.scale(image, (size, size))
         self._images = [
@@ -18,5 +19,7 @@ class Pacman(pygame.sprite.Sprite):
 
     @property
     def image(self):
+        if self.size < 8:
+            return self.surf
         return self._images[self.rotation % 4]
 

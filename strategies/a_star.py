@@ -1,6 +1,6 @@
 from typing import List, Tuple, Dict, Any
 from queue import PriorityQueue
-from .common import find_free_place, gen_path, format
+from .common import find_free_place, gen_path, format, measured
 from .base_strategy import Strategy
 from labyrinth.labyrinth import Labyrinth
 
@@ -45,6 +45,7 @@ class AStar(Strategy):
         self.set_new_target()
         return format(self.src, self.target)
 
+    @measured
     def a_star(self, labyrinth, src, dest) -> List:
         queue = PriorityQueue()
         used = set()
@@ -54,6 +55,7 @@ class AStar(Strategy):
 
         parent = {}
         while not queue.empty():
+            self.benchmarking['ops'] += 1
             current = queue.get()[1]
             if current == dest:
                 return restore_path(parent, src, dest)
@@ -61,6 +63,7 @@ class AStar(Strategy):
             used.add(current)
 
             for to in labyrinth.edges[current]:
+                self.benchmarking['ops'] += 1
                 tentative_score = g[current] + 1
 
                 if to in used and tentative_score >= g[to]:
@@ -75,6 +78,7 @@ class AStar(Strategy):
         return None
 
     def apply(self, labyrinth, src, dest):
+        self.benchmarking['ops'] = 0
         path = self.a_star(labyrinth, src, dest)
         if path is None:
             raise ValueError(f"Destination {dest} is unreachable from source {src}")

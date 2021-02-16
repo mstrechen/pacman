@@ -1,8 +1,11 @@
 from game import init, start
-
+from settings import args
 
 def main():
-    init()
+    init(
+        strategy=args.strategy,
+        used_map=args.map
+    )
     start()
 
 

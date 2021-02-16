@@ -3,14 +3,11 @@ from game.game import Game
 from labyrinth.labyrinth import Labyrinth
 
 game: t.Optional[Game] = None
-labyrinth: t.Optional[Labyrinth] = None
 
 
-def init():
+def init(**kwargs):
     global game
-    global labyrinth
-    labyrinth = Labyrinth()
-    game = Game()
+    game = Game(**kwargs)
 
 
 def start():

@@ -1,5 +1,6 @@
+import sys
 from typing import List, Dict, Any
-from .common import find_free_place, gen_path, format
+from .common import find_free_place, gen_path, format, measured
 from .base_strategy import Strategy
 from labyrinth.labyrinth import Labyrinth
 
@@ -8,18 +9,22 @@ class DFS(Strategy):
     NAME = 'DFS'
 
     def setup(self, labyrinth: Labyrinth) -> Dict[str, Any]:
-        super(DFS, self).__init__(labyrinth)
+        super(DFS, self).setup(labyrinth)
+        sys.setrecursionlimit(max(sys.getrecursionlimit(), 100*1000))
         self.path = None
         self.src = find_free_place(self.labyrinth)
         self.set_new_target()
         return format(self.src, self.target)
 
+    @measured
     def dfs(self, labyrinth, path, used, src, dest) -> List:
+        self.benchmarking['ops'] += 1
         if src == dest:
             return path
 
         used.add(src)
         for to in labyrinth.edges[src]:
+            self.benchmarking['ops'] += 1
             if to not in used:
                 path.append(to)
                 result = self.dfs(labyrinth, path, used, to, dest)
@@ -29,6 +34,7 @@ class DFS(Strategy):
         used.pop()
 
     def apply(self, labyrinth, src, dest):
+        self.benchmarking['ops'] = 0
         path = self.dfs(labyrinth, [], set(), src, dest)
         if path is None:
             raise ValueError(f"Destination {dest} is unreachable from source {src}")
