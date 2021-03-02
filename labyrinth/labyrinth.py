@@ -1,10 +1,12 @@
-from typing import Set, Tuple, List
+
+from typing import Dict, List, Set, Tuple
 
 
 class Labyrinth:
     def __init__(self):
         self.cells: Set[Tuple[int, int]] = set()
-        self.edges: dict[Tuple[int, int], Set[Tuple[int, int]]] = dict()
+
+        self.edges: Dict[Tuple[int, int], Set[Tuple[int, int]]] = dict()
         self.raw_img: List[str] = []
 
     def _add_edge(self, cell_from: Tuple[int, int], cell_to: Tuple[int, int]) -> None:
@@ -19,7 +21,7 @@ class Labyrinth:
             for line in input_file:
                 if line == "":
                     break
-                self.raw_img.append(line)
+                self.raw_img.append(line[:-1] if line.endswith('\n') else line)
                 for pos in range(len(line) - 1):
                     if line[pos] == ' ':
                         self.cells.add((line_num, pos))
@@ -35,3 +37,10 @@ class Labyrinth:
 
                 line_num += 1
                 prev_line = line
+
+
+    @classmethod
+    def from_file(cls, filepath: str) -> 'Labyrinth':
+        labyrinth = cls()
+        labyrinth.load_from_file(filepath)
+        return labyrinth
