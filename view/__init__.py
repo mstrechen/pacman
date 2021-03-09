@@ -68,7 +68,8 @@ class View:
     def update_state(self, state: t.Dict[str, t.Any], benchmarking: t.Dict[str, t.Any]):
         self.benchmarking = benchmarking
         self.update_rotations(self.state, state)
-        for int_state in self._generate_intermediate_states(5, self.state, state):
+        steps = 5 if self.cell_size > 8 else 1
+        for int_state in self._generate_intermediate_states(steps, self.state, state):
             self.state.update(int_state)
             self.sync()
             self.render()
