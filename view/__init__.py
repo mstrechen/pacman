@@ -3,6 +3,8 @@ import pygame
 
 from labyrinth.labyrinth import Labyrinth
 from view.banana import Banana
+from view.dot import Dot
+from view.ghost import Ghost
 from view.pacman import Pacman
 
 MAX_DISPLAY_WIDTH = 1000
@@ -13,19 +15,24 @@ MAX_DISPLAY_HEIGHT = 500
 class View:
     cell_size: int
     sprites: t.Dict[str, pygame.sprite.Sprite]
-    sprites_group: pygame.sprite.Group = pygame.sprite.Group()
+    sprites_group: pygame.sprite.Group
     labyrinth: Labyrinth = None
 
-    SMOOTH_MOVEMENT = ['pacman']
+    SMOOTH_MOVEMENT = ['pacman', 'ghosts']
     SPRITES_Z_INDEX = {
         'pacman': 0,
         'target': -1,
+        'ghosts': 1,
     }
+    REGULAR_SPRITES = ['pacman', 'target']
+    LIST_SPRITES = ['ghosts']
+    STATIC_SPRITES = ['dots']
 
     def __init__(self):
         pygame.init()
+        self.sprites_group = pygame.sprite.Group()
         self.display_info = pygame.display.Info()
-        self.sprites = {}
+        self.sprites: t.Dict[t.Union[pygame.sprite.Sprite, t.List[pygame.sprite.Sprite]]] = {}
         self.benchmarking = {}
 
         self.screen = pygame.display.set_mode([MAX_DISPLAY_WIDTH, MAX_DISPLAY_HEIGHT])
@@ -61,6 +68,21 @@ class View:
             target = Banana(size=self.cell_size)
             self.sprites['target'] = target
             target.rect.move_ip(y * self.cell_size, x * self.cell_size)
+        if 'ghosts' in state:
+            self.sprites['ghosts'] = [
+                Ghost(size=self.cell_size)
+                for _ in state['ghosts']
+            ]
+            for i, (x, y) in enumerate(state['ghosts']):
+                self.sprites['ghosts'][i].rect.move_ip(y * self.cell_size, x * self.cell_size)
+        if 'dots' in state:
+            self.sprites['dots'] = [
+                Dot(size=self.cell_size)
+                for _ in state['dots']
+            ]
+            for i, (x, y) in enumerate(state['dots']):
+                sprite: Dot = self.sprites['dots'][i]
+                sprite.rect.move_ip(y * self.cell_size + sprite.offset, x * self.cell_size + sprite.offset)
 
         self.sprites_group.add(*self.sorted_sprites)
         self.render()
@@ -78,15 +100,30 @@ class View:
         self.render()
 
     def sync(self):
-        pacman = self.sprites['pacman']
-        x, y = self.state['pacman']
-        pacman.rect.update([y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size])
-        target = self.sprites['target']
-        x, y = self.state['target']
-        target.rect.update([y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size])
+        if 'pacman' in self.sprites:
+            pacman = self.sprites['pacman']
+            x, y = self.state['pacman']
+            pacman.rect.update([y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size])
+        if 'target' in self.sprites:
+            target = self.sprites['target']
+            x, y = self.state['target']
+            target.rect.update([y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size])
+        if 'ghosts' in self.sprites:
+            for source, target in zip(self.state['ghosts'], self.sprites['ghosts']):
+                x, y = source
+                target.rect.update([y * self.cell_size, x * self.cell_size, self.cell_size, self.cell_size])
+        if 'dots' in self.state:
+            self.sprites['dots'] = [
+                Dot(size=self.cell_size)
+                for _ in self.state['dots']
+            ]
+            for i, (x, y) in enumerate(self.state['dots']):
+                sprite: Dot = self.sprites['dots'][i]
+                sprite.rect.move_ip(y * self.cell_size + sprite.offset, x * self.cell_size + sprite.offset)
 
     def render(self):
         self.draw_labyrinth()
+        self.draw_dots()
         self.sprites_group.draw(self.screen)
         self.show_benchmarking()
         pygame.display.flip()
@@ -95,10 +132,24 @@ class View:
     @property
     def sorted_sprites(self):
         res = sorted(
-            self.sprites.items(),
+            [
+                (key, value)
+                for key, value in self.sprites.items()
+                if key in self.REGULAR_SPRITES
+            ],
             key=lambda kv: self.SPRITES_Z_INDEX.get(kv[0])
         )
-        return list(map(lambda kv: kv[1], res))
+        res = list(map(lambda kv: kv[1], res))
+        for sprite_list in sorted(
+                [
+                    (key, value)
+                    for key, value in self.sprites.items()
+                    if key in self.LIST_SPRITES
+                ],
+                key=lambda kv: self.SPRITES_Z_INDEX.get(kv[0])
+        ):
+            res += sprite_list[1]
+        return res
 
     def update_rotations(self, from_state, to_state):
         pacman = self.sprites['pacman']
@@ -124,7 +175,7 @@ class View:
             intermediate_state = {}
             for key, value in state_from.items():
                 if key not in cls.SMOOTH_MOVEMENT:
-                    intermediate_state[key] = value if i == 0 else state_to[key]
+                    intermediate_state[key] = value if i == 0 or key not in state_to else state_to[key]
                 elif (
                         (key not in state_to)
                         or (not isinstance(value, list) and not isinstance(value, tuple))
@@ -132,10 +183,19 @@ class View:
                 ):
                     intermediate_state[key] = value
                 else:
-                    intermediate_state[key] = (
-                        value[0] + (state_to[key][0] - value[0]) * i / count,
-                        value[1] + (state_to[key][1] - value[1]) * i / count
-                    )
+                    if key in cls.REGULAR_SPRITES:
+                        intermediate_state[key] = (
+                            value[0] + (state_to[key][0] - value[0]) * i / count,
+                            value[1] + (state_to[key][1] - value[1]) * i / count
+                        )
+                    else:
+                        intermediate_state[key] = [
+                            (
+                                source[0] + (dest[0] - source[0]) * i / count,
+                                source[1] + (dest[1] - source[1]) * i / count
+                            )
+                            for source, dest in zip(value, state_to[key])
+                        ]
             intermediate_states.append(intermediate_state)
         return intermediate_states
 
@@ -150,3 +210,11 @@ class View:
         if y_t < y_f:
             return 0
         return 2
+
+    def draw_dots(self):
+        if 'dots' not in self.sprites:
+            return
+        sprites = self.sprites['dots']
+        sprites_group = pygame.sprite.Group()
+        sprites_group.add(*sprites)
+        sprites_group.draw(self.screen)
