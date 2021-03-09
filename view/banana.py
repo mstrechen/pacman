@@ -9,7 +9,7 @@ class Banana(pygame.sprite.Sprite):
         self.image = image
 
         self.surf = pygame.Surface((size, size))
-        self.surf.fill((255, 0, 0))
+        self.surf.fill((255, 255, 0))
         self.rect = self.surf.get_rect()
         self.rotation = 0
 
