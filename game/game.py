@@ -1,11 +1,13 @@
 import os
+from time import sleep
+
 import pygame
 import collections
 
 from labyrinth.generator import generate_labyrinth
 from labyrinth.labyrinth import Labyrinth
 from strategies import Strategy
-from strategies.base_strategy import NextLevelException
+from strategies.base_strategy import NextLevelException, GameOverException
 from view import View
 
 LevelConfiguration = collections.namedtuple("LevelConfiguration", [
@@ -49,6 +51,8 @@ class Game:
 
     def mainloop(self):
         running = True
+        game_is_active = True
+        i = 0
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -56,7 +60,9 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_d:
                         self.show_benchmarking = not self.show_benchmarking
-
+            if not game_is_active:
+                sleep(0.1)
+                continue
             try:
                 next_step = self.strategy.next_step()
                 benchmarking = self.strategy.benchmarking if self.show_benchmarking else {}
@@ -75,3 +81,6 @@ class Game:
 
                 self.view.set_initial_state(self.strategy.setup(self.labyrinth,
                                                                 level_configurations[self.level].ghosts))
+            except GameOverException:
+                game_is_active = False
+                self.view.draw_game_over()

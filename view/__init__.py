@@ -37,7 +37,7 @@ class View:
         self.screen = pygame.display.set_mode([MAX_DISPLAY_WIDTH, MAX_DISPLAY_HEIGHT])
         self.clock = pygame.time.Clock()
 
-    def draw_labyrinth(self, labyrinth: t.Optional[Labyrinth] = None):
+    def draw_labyrinth(self, labyrinth: t.Optional[Labyrinth] = None, dimmed=False):
         self.labyrinth = labyrinth or self.labyrinth
         labyrinth = self.labyrinth
         cell_size = min(
@@ -49,7 +49,7 @@ class View:
 
         for line_no, line in enumerate(labyrinth.raw_img):
             for char_no, char in enumerate(line):
-                color = (0, 0, 0) if char == ' ' else (0, 0, 200)
+                color = (0, 0, 0) if char == ' ' else (0, 0, (50 if dimmed else 200))
                 pygame.draw.rect(
                     self.screen, color,
                     (char_no * cell_size, line_no * cell_size, cell_size, cell_size)
@@ -226,3 +226,14 @@ class View:
         sprites_group = pygame.sprite.Group()
         sprites_group.add(*sprites)
         sprites_group.draw(self.screen)
+
+    def draw_game_over(self):
+        self.draw_labyrinth(dimmed=True)
+        font = pygame.font.Font(None, 144)
+        w, h = self.screen.get_size()
+
+        text = font.render("GAME OVER", True, (140, 0, 0))
+        place = text.get_rect(topleft=(w/2 - 300, h/2 - 52))
+        self.screen.blit(text, place)
+        pygame.display.flip()
+        self.clock.tick(30)
