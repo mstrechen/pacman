@@ -1,5 +1,6 @@
-
-from typing import Dict, List, Set, Tuple
+import sys
+from typing import Dict, List, Set, Tuple, Optional
+from queue import Queue
 
 
 class Labyrinth:
@@ -38,9 +39,25 @@ class Labyrinth:
                 line_num += 1
                 prev_line = line
 
-
     @classmethod
     def from_file(cls, filepath: str) -> 'Labyrinth':
         labyrinth = cls()
         labyrinth.load_from_file(filepath)
         return labyrinth
+
+    def get_distances(self, cell_from: Tuple[int, int]) -> Dict[Tuple[int, int], int]:
+        dist = dict()
+        dist[cell_from] = 0
+        q = Queue()
+        q.put(cell_from)
+        while not q.empty():
+            cur_cell = q.get()
+            for next_cell in self.edges[cur_cell]:
+                if dist.get(next_cell) is None:
+                    dist[next_cell] = dist[cur_cell] + 1
+                    q.put(next_cell)
+
+        return dist
+
+    def get_distance(self, cell_from: Tuple[int, int], cell_to: Tuple[int, int]) -> Optional[int]:
+        return self.get_distances(cell_from).get(cell_to)

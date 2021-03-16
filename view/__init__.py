@@ -11,7 +11,6 @@ MAX_DISPLAY_WIDTH = 1000
 MAX_DISPLAY_HEIGHT = 500
 
 
-
 class View:
     cell_size: int
     sprites: t.Dict[str, pygame.sprite.Sprite]
@@ -57,6 +56,7 @@ class View:
                 )
 
     def set_initial_state(self, state: t.Dict[str, t.Any]):
+        self.sprites_group.remove(*self.sorted_sprites)
         self.state = state
         if 'pacman' in state:
             x, y = state['pacman']
@@ -96,8 +96,16 @@ class View:
             self.sync()
             self.render()
         self.state.update(state)
+        self.eat_dots()
         self.sync()
         self.render()
+
+    def eat_dots(self):
+        if self.state['pacman'] in self.state['dots']:
+            self.state['score'] += 1
+            updated_dots = self.state['dots']
+            updated_dots.remove(self.state['pacman'])
+            self.state['dots'] = updated_dots
 
     def sync(self):
         if 'pacman' in self.sprites:

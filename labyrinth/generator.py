@@ -54,9 +54,10 @@ def _add_to_map(half_map: List[List[int]],
 
 def generate_labyrinth(height: int,
                        width: int,
-                       output_path: str) -> None:
+                       output_path: str,
+                       figures_resource_path: str = "figures.json") -> None:
     grid: List[List[int]] = [[0 for _ in range(width)] for _ in range(height)]
-    with open("figures.json") as figures_file:
+    with open(figures_resource_path) as figures_file:
         figures: Dict[str, List[List[List[int]]]] = json.load(figures_file)
 
     counter = 0

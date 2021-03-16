@@ -1,5 +1,5 @@
 import random
-import resource
+# import resource
 import typing as t
 from functools import wraps
 
@@ -26,13 +26,13 @@ def find_free_place(labyrinth) -> t.Tuple[int, int]:
 def measured(func):
     @wraps(func)
     def wrapper(self: Strategy, *args, **kwargs):
-        before = resource.getrusage(resource.RUSAGE_SELF)
+        # before = resource.getrusage(resource.RUSAGE_SELF)
         res = func(self, *args, **kwargs)
-        after = resource.getrusage(resource.RUSAGE_SELF)
+        # after = resource.getrusage(resource.RUSAGE_SELF)
         self.benchmarking.update({
-            'cpu_user': max(self.benchmarking['cpu_user'], after.ru_utime - before.ru_utime),
-            'cpu_system': max(self.benchmarking['cpu_user'], after.ru_stime - before.ru_stime),
-            'memory': max(self.benchmarking['memory'], after.ru_maxrss - before.ru_maxrss),
+            'cpu_user': max(self.benchmarking['cpu_user'], 0),  # after.ru_utime - before.ru_utime),
+            'cpu_system': max(self.benchmarking['cpu_user'], 0),  # after.ru_stime - before.ru_stime),
+            'memory': max(self.benchmarking['memory'], 0),  # after.ru_maxrss - before.ru_maxrss),
         })
         return res
     return wrapper

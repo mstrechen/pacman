@@ -36,14 +36,15 @@ def restore_path(parent, src, dest) -> List:
 class AStar(Strategy):
     NAME = 'A*'
 
-    def setup(self, labyrinth: Labyrinth) -> Dict[str, Any]:
-        super(AStar, self).setup(labyrinth)
+    def setup(self, labyrinth: Labyrinth, ghost_count: int = 0) -> Dict[str, Any]:
+        general_state = super(AStar, self).setup(labyrinth)
         dimensions = len(labyrinth.raw_img), len(labyrinth.raw_img[0])
         self.heuristic = TunneledManhattan(dimensions)
         self.path = None
         self.src = find_free_place(self.labyrinth)
         self.set_new_target()
-        return format(self.src, self.target)
+        general_state.update(format(self.src, self.target))
+        return general_state
 
     @measured
     def a_star(self, labyrinth, src, dest) -> List:
