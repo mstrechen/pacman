@@ -1,5 +1,6 @@
 import sys
 import typing as t
+import random
 from math import modf
 
 from labyrinth.labyrinth import Labyrinth
@@ -53,6 +54,10 @@ class Minimax(Strategy):
                         closest_ghost_possibility,
                         pacman_distances[possible_ghost_position]
                     )
+                closest_ghost_possibility = min(
+                    closest_ghost_possibility,
+                    pacman_distances[ghost]
+                )
             if closest_ghost_possibility < 15:
                 current_score -= 4 ** (10.0 / max(0.02, closest_ghost_possibility))
             closest_dot = sys.maxsize
@@ -76,7 +81,9 @@ class Minimax(Strategy):
                             furthest_pacman_position,
                             ghost_distances[possible_next_pacman_position],
                         )
-                    ghost_scores[possible_next_ghost_position] = -furthest_pacman_position
+                    ghost_scores[possible_next_ghost_position] = -furthest_pacman_position + random.choice([
+                        0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4,
+                    ])
                 next_ghost_position = max(ghost_scores, key=ghost_scores.get)
                 next_ghosts.append(next_ghost_position)
             self.ghosts = next_ghosts

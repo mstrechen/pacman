@@ -135,7 +135,7 @@ class View:
         self.sprites_group.draw(self.screen)
         self.show_benchmarking()
         pygame.display.flip()
-        self.clock.tick(30)
+        self.clock.tick(600)
 
     @property
     def sorted_sprites(self):
@@ -233,6 +233,17 @@ class View:
         w, h = self.screen.get_size()
 
         text = font.render("GAME OVER", True, (140, 0, 0))
+        place = text.get_rect(topleft=(w/2 - 300, h/2 - 52))
+        self.screen.blit(text, place)
+        pygame.display.flip()
+        self.clock.tick(30)
+
+    def draw_game_win(self):
+        self.draw_labyrinth(dimmed=True)
+        font = pygame.font.Font(None, 144)
+        w, h = self.screen.get_size()
+
+        text = font.render("YOU WON", True, (0, 140, 0))
         place = text.get_rect(topleft=(w/2 - 300, h/2 - 52))
         self.screen.blit(text, place)
         pygame.display.flip()

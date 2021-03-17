@@ -59,5 +59,12 @@ class Labyrinth:
 
         return dist
 
+    def check_validity(self) -> bool:
+        distances = self.get_distances(list(self.cells)[0])
+        for cell in self.cells:
+            if distances.get(cell) is None:
+                return False
+        return True
+
     def get_distance(self, cell_from: Tuple[int, int], cell_to: Tuple[int, int]) -> Optional[int]:
         return self.get_distances(cell_from).get(cell_to)

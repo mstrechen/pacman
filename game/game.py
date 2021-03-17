@@ -17,13 +17,10 @@ LevelConfiguration = collections.namedtuple("LevelConfiguration", [
 ])
 
 level_configurations = [
-    LevelConfiguration(3, 2, 0),
-    LevelConfiguration(4, 3, 1),
-    LevelConfiguration(5, 5, 1),
     LevelConfiguration(7, 5, 2),
-    LevelConfiguration(10, 8, 3),
-    LevelConfiguration(10, 10, 3),
-    LevelConfiguration(10, 10, 4),
+    LevelConfiguration(10, 5, 2),
+    LevelConfiguration(10, 7, 3),
+    LevelConfiguration(10, 7, 4),
 ]
 
 
@@ -34,12 +31,15 @@ class Game:
             self.labyrinth = Labyrinth.from_file(f'./labyrinth/pregenerated/{used_map}.txt')
         else:
             self.level = 0
-            generate_labyrinth(level_configurations[self.level].labyrinth_height,
-                               level_configurations[self.level].labyrinth_width,
-                               "tmp_labyrinth.txt",
-                               "./labyrinth/figures.json")
-            self.labyrinth = Labyrinth.from_file("tmp_labyrinth.txt")
-            os.remove("tmp_labyrinth.txt")
+            while True:
+                generate_labyrinth(level_configurations[self.level].labyrinth_height,
+                                   level_configurations[self.level].labyrinth_width,
+                                   "tmp_labyrinth.txt",
+                                   "./labyrinth/figures.json")
+                self.labyrinth = Labyrinth.from_file("tmp_labyrinth.txt")
+                os.remove("tmp_labyrinth.txt")
+                if self.labyrinth.check_validity():
+                    break
         self.view = View()
         self.view.draw_labyrinth(self.labyrinth)
         self.show_benchmarking = False
@@ -69,13 +69,19 @@ class Game:
                 self.view.update_state(next_step, benchmarking)
             except NextLevelException:
                 self.level += 1
-                generate_labyrinth(level_configurations[self.level].labyrinth_height,
-                                   level_configurations[self.level].labyrinth_width,
-                                   "tmp_labyrinth.txt",
-                                   "./labyrinth/figures.json")
-                self.labyrinth = Labyrinth.from_file("tmp_labyrinth.txt")
-                os.remove("tmp_labyrinth.txt")
-
+                if self.level > len(level_configurations):
+                    game_is_active = False
+                    self.view.draw_game_win()
+                while True:
+                    generate_labyrinth(level_configurations[self.level].labyrinth_height,
+                                       level_configurations[self.level].labyrinth_width,
+                                       "tmp_labyrinth.txt",
+                                       "./labyrinth/figures.json")
+                    self.labyrinth = Labyrinth.from_file("tmp_labyrinth.txt")
+                    os.remove("tmp_labyrinth.txt")
+                    if self.labyrinth.check_validity():
+                        break
+                self.view = View()
                 self.view.draw_labyrinth(self.labyrinth)
                 self.show_benchmarking = False
 
