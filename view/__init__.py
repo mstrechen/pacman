@@ -134,6 +134,7 @@ class View:
         self.draw_dots()
         self.sprites_group.draw(self.screen)
         self.show_benchmarking()
+        self.show_score()
         pygame.display.flip()
         self.clock.tick(600)
 
@@ -173,6 +174,19 @@ class View:
             text = font.render(text, True, (0, 140, 0))
             place = text.get_rect(topleft=(10, 10 + i * 36))
             self.screen.blit(text, place)
+
+    def show_score(self):
+        font = pygame.font.Font(None, 36)
+
+        text = f'Score: {self.state["score"]}'
+        text = font.render(text, True, (0, 140, 0))
+        w, h = self.screen.get_size()
+
+        place = text.get_rect(topright=(w - 10, 10))
+        self.screen.blit(text, place)
+
+    def get_score(self) -> int:
+        return self.state.get('score', 0)
 
     @classmethod
     def _generate_intermediate_states(cls, count: int, state_from: t.Dict[str, t.Any], state_to: t.Dict[str, t.Any])\

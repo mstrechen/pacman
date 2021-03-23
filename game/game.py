@@ -17,6 +17,10 @@ LevelConfiguration = collections.namedtuple("LevelConfiguration", [
 ])
 
 level_configurations = [
+    LevelConfiguration(2, 2, 0),
+    LevelConfiguration(3, 3, 0),
+    LevelConfiguration(4, 4, 1),
+    LevelConfiguration(5, 5, 1),
     LevelConfiguration(7, 5, 2),
     LevelConfiguration(10, 5, 2),
     LevelConfiguration(10, 7, 3),
@@ -81,12 +85,13 @@ class Game:
                     os.remove("tmp_labyrinth.txt")
                     if self.labyrinth.check_validity():
                         break
+                current_score = self.view.get_score()
                 self.view = View()
                 self.view.draw_labyrinth(self.labyrinth)
                 self.show_benchmarking = False
-
                 self.view.set_initial_state(self.strategy.setup(self.labyrinth,
                                                                 level_configurations[self.level].ghosts))
+                self.view.state['score'] = current_score
             except GameOverException:
                 game_is_active = False
                 self.view.draw_game_over()
